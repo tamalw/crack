@@ -47,7 +47,7 @@ class REXMLUtilityNode #:nodoc:
 
   self.available_typecasts = self.typecasts.keys
 
-  def initialize(name, normalized_attributes = {})
+  def initialize(mode, name, normalized_attributes = {})
     
     # unnormalize attribute values
     attributes = Hash[* normalized_attributes.map { |key, value|
@@ -62,6 +62,7 @@ class REXMLUtilityNode #:nodoc:
     @attributes   = undasherize_keys(attributes)
     @children     = []
     @text         = false
+    @mode         = mode
   end
 
   def add_node(node)
@@ -81,7 +82,9 @@ class REXMLUtilityNode #:nodoc:
     end
 
     if @text
-      return { name => typecast_value( unnormalize_xml_entities( inner_html ) ) }
+      t = typecast_value( unnormalize_xml_entities( inner_html ) )
+      t = [t, attributes] unless attributes.empty? or @mode == :safe
+      return { name => t }
     else
       #change repeating groups into an array
       groups = @children.inject({}) { |s,e| (s[e.name] ||= []) << e; s }
@@ -183,7 +186,7 @@ end
 
 module Crack
   class XML
-    def self.parse(xml)
+    def self.parse(xml,mode = :safe)
       stack = []
       parser = REXML::Parsers::BaseParser.new(xml)
 
@@ -195,7 +198,7 @@ module Crack
         when :end_doctype, :start_doctype
           # do nothing
         when :start_element
-          stack.push REXMLUtilityNode.new(event[1], event[2])
+          stack.push REXMLUtilityNode.new(mode, event[1], event[2])
         when :end_element
           if stack.size > 1
             temp = stack.pop
