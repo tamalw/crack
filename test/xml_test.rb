@@ -149,7 +149,7 @@ class XmlTest < Test::Unit::TestCase
   
   should "should not ignore attributes when a child is a text node in explicit mode" do
     xml = "<root attr1='1'>Stuff</root>"
-    Crack::XML.parse(xml, :mode => :explicit).should == { "root" => [ "Stuff", { 'attr1' => '1' } ] }
+    Crack::XML.parse(xml, :explicit).should == { "root" => [ "Stuff", { 'attr1' => '1' } ] }
   end
 
   should "should ignore attributes when any child is a text node" do

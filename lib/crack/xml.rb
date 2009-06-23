@@ -83,7 +83,7 @@ class REXMLUtilityNode #:nodoc:
 
     if @text
       t = typecast_value( unnormalize_xml_entities( inner_html ) )
-      t = [t, attributes] unless attributes.empty? or @mode == :safe
+      t = [t, attributes] if !attributes.empty? and @mode == :explicit
       return { name => t }
     else
       #change repeating groups into an array
