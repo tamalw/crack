@@ -68,31 +68,6 @@ class XmlTest < Test::Unit::TestCase
 
     Crack::XML.parse(xml).should == hash
   end
-  
-  should "should include attributes hash if present" do
-    xml =<<-XML
-      <opt>
-        <user login="grep">Gary R Epstein</user>
-        <user>Simon T Tyson</user>
-      </opt>
-    XML
-
-    Crack::XML.parse(xml)['opt']['user'].class.should == Array
-
-    hash = {
-      'opt' => {
-        'user' => [
-          'Gary R Epstein',
-          'Simon T Tyson'
-        ]
-      }
-    }
-
-    Crack::XML.parse(xml).should == hash
-    
-    Crack::XML.parse(xml)['opt']['user'][0].attributes.should == { 'login' => 'grep' }
-    Crack::XML.parse(xml)['opt']['user'][1].attributes.should == {}
-  end
 
   should "should typecast an integer" do
     xml = "<tag type='integer'>10</tag>"
@@ -170,6 +145,11 @@ class XmlTest < Test::Unit::TestCase
   should "should ignore attributes when a child is a text node" do
     xml = "<root attr1='1'>Stuff</root>"
     Crack::XML.parse(xml).should == { "root" => "Stuff" }
+  end
+  
+  should "should not ignore attributes when a child is a text node in explicit mode" do
+    xml = "<root attr1='1'>Stuff</root>"
+    Crack::XML.parse(xml, :mode => :explicit).should == { "root" => [ "Stuff", { 'attr1' => '1' } ] }
   end
 
   should "should ignore attributes when any child is a text node" do
